@@ -7,41 +7,79 @@ A modular, intent-classification and routing service. This application uses a tw
 - **Confidence Guardrails:** Safely defaults to `unclear` if the LLM's confidence score drops below 0.70.
 - **Opinionated Personas:** Routes the prompt to a specific system persona based on the detected intent.
 - **Manual Overrides:** Users can force a specific persona by prefixing their prompt (e.g., `@code How do I sort a list?`).
+- **Full Logging:** Every request is logged to `route_log.jsonl` with intent, confidence, message, and response.
 
 ## 📦 Setup & Installation
-1. Clone the repository and navigate into the project folder.
-2. Install the required dependencies:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/sarvea45/LLM-Powered-Prompt-Router-for-Intent-Classification.git
+   cd LLM-Powered-Prompt-Router-for-Intent-Classification
+   ```
+
+2. Install dependencies:
    ```bash
    pip install -r requirements.txt
-   Create a .env file in the root directory based on .env.example and add your Groq API key:
+   ```
 
-Code snippet
-GROQ_API_KEY=gsk_your_api_key_here
-💻 How to Run
-Interactive CLI Mode:
-Run the main application to chat with the router in real-time.
+3. Create a `.env` file from the example and add your Groq API key:
+   ```bash
+   cp .env.example .env
+   # Then edit .env and set: GROQ_API_KEY=gsk_your_api_key_here
+   ```
 
-Bash
+## 💻 How to Run
+
+**Interactive CLI Mode:**
+```bash
 python app.py
-Automated Test Suite:
-Run the test script to automatically process 15+ predefined queries across all categories. Results are appended to route_log.jsonl.
+```
 
-Bash
+**Automated Test Suite** (runs 16 predefined queries across all categories):
+```bash
 python test_runner.py
+```
 
----
+**Docker:**
+```bash
+docker-compose up --build
+```
 
-### 🧹 3. Clean Up `route_log.jsonl` and Git Tracking
-Right now, your `.gitignore` has the log file commented out (`# route_log.jsonl`). Let's fix that so you don't commit messy error logs.
+## 🗂️ Project Structure
 
-1. **Update `.gitignore`**: Open `.gitignore` and remove the `#` so it looks like this:
-   ```text
-   # Logs
-   route_log.jsonl
-Clear the Git Cache: Since the file was already tracked, you need to tell Git to "forget" it. Run this in your terminal:
+```
+├── app.py            # Main CLI entry point
+├── classifier.py     # classify_intent() — LLM-based intent detection
+├── router.py         # route_and_respond() — expert persona routing
+├── prompts.json      # Expert system prompts (code, data, writing, career)
+├── test_runner.py    # Automated test suite with 16 test messages
+├── route_log.jsonl   # Auto-generated request log (gitignored)
+├── Dockerfile
+├── docker-compose.yml
+└── .env.example
+```
 
-Bash
-git rm --cached route_log.jsonl
-Wipe the file: Open route_log.jsonl in your editor, delete all the text inside it, and save it as an empty file.
+## 🧠 How It Works
 
-Create an Example File: Create a new file called route_log.jsonl.example and put just one clean, perfect JSON line in it so reviewers see the format without seeing all your test history.
+```
+User Message
+    │
+    ▼
+classify_intent()       ← fast LLM call → {intent, confidence}
+    │
+    ▼
+route_and_respond()     ← selects expert system prompt → final LLM call
+    │
+    ▼
+Response + route_log.jsonl entry
+```
+
+## 📋 Supported Intents
+
+| Intent | Persona |
+|---|---|
+| `code` | Expert programmer — production-ready code, error handling |
+| `data` | Data analyst — statistical reasoning, visualization suggestions |
+| `writing` | Writing coach — diagnose issues, never rewrites for you |
+| `career` | Career advisor — concrete actionable steps, no platitudes |
+| `unclear` | Asks a clarifying question to determine which area you need |
