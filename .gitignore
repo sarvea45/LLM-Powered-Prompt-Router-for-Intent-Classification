@@ -1,0 +1,13 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+.vscode/  # If you have specific settings for your project, otherwise you might want to ignore this
+# Python cache
+__pycache__/
+*.pyc
+
+# Logs (You might want to commit the initial one for submission, but generally ignore logs)
+# route_log.jsonl

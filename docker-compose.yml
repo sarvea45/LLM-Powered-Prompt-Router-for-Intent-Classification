@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  prompt-router:
+    build: .
+    container_name: groq_router_service
+    # This connects your folder to the container so 'route_log.jsonl' 
+    # saves directly to your computer.
+    volumes:
+      - .:/app
+    # This pulls your GROQ_API_KEY from your local .env file
+    env_file:
+      - .env
+    # Critical for CLI apps: this lets you type 'You: ...' in the terminal
+    stdin_open: true
+    tty: true
