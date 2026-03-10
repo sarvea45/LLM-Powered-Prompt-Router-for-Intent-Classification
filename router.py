@@ -6,10 +6,15 @@ with open("prompts.json", "r") as f:
 def route_and_respond(client, message: str, intent_data: dict) -> str:
     intent = intent_data["intent"]
     
+    # Dynamically generate the unclear response using the LLM
     if intent == "unclear":
-        return "I'm not quite sure how to help. Are you asking about coding, data, writing, or career advice?"
-
-    system_instruction = EXPERT_PROMPTS.get(intent)
+        system_instruction = (
+            "You are a helpful routing assistant. The user asked a question that does not clearly "
+            "fall into coding, data analysis, writing, or career advice. Ask them a polite, brief, "
+            "and conversational clarifying question to determine which of those 4 areas they need help with."
+        )
+    else:
+        system_instruction = EXPERT_PROMPTS.get(intent)
     
     try:
         response = client.chat.completions.create(
