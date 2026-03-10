@@ -43,16 +43,24 @@ def log_interaction(intent, confidence, message, response):
     with open("route_log.jsonl", "a") as f:
         f.write(json.dumps(log_entry) + "\n")
 
+# In test_runner.py
 def run_tests():
     print("🚀 Starting Automated Test Suite...\n")
+    valid_intents = [f"@{i}" for i in ["code", "data", "writing", "career"]]
+    
     for msg in TEST_MESSAGES:
         print(f"Processing: '{msg}'")
         intent_info = classify_intent(client, msg)
-        reply = route_and_respond(client, msg, intent_info)
+        
+        # Strip prefix logic
+        clean_msg = msg
+        if msg.strip().lower().startswith(tuple(valid_intents)):
+            clean_msg = msg.split(" ", 1)[1] if " " in msg else msg
+            
+        reply = route_and_respond(client, clean_msg, intent_info)
         log_interaction(intent_info['intent'], intent_info['confidence'], msg, reply)
         print(f"-> Logged as [{intent_info['intent'].upper()}]\n")
     
     print("✅ All tests completed! Check route_log.jsonl for the results.")
-
 if __name__ == "__main__":
     run_tests()

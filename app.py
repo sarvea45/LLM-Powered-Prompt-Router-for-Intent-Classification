@@ -18,6 +18,7 @@ def log_interaction(intent, confidence, message, response):
     with open("route_log.jsonl", "a") as f:
         f.write(json.dumps(log_entry) + "\n")
 
+# In app.py
 def main():
     print("\n🚀 Groq-Powered Modular Router Active.")
     print("Type 'exit' to quit.")
@@ -27,9 +28,18 @@ def main():
         if not user_input: continue
         if user_input.lower() in ["exit", "quit"]: break
         
-        # Pass the groq client
         intent_info = classify_intent(client, user_input)
-        reply = route_and_respond(client, user_input, intent_info)
+        
+        # Strip override prefix before sending to the expert LLM
+        display_message = user_input
+        valid_intents = [f"@{i}" for i in ["code", "data", "writing", "career"]]
+        
+        if user_input.strip().lower().startswith(tuple(valid_intents)):
+            # Split off the first word (the @tag) and keep the rest
+            display_message = user_input.split(" ", 1)[1] if " " in user_input else user_input
+            
+        # Pass the clean 'display_message' to the router, but log the original 'user_input'
+        reply = route_and_respond(client, display_message, intent_info)
         
         log_interaction(intent_info['intent'], intent_info['confidence'], user_input, reply)
         
